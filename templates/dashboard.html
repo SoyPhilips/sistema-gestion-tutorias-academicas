@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Tutorías Académicas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="bg-gradient-glow"></div>
+    
+    <header>
+        <div class="nav-container">
+            <div class="logo">TUTORÍAS ACADÉMICAS</div>
+            <div class="user-info-nav">
+                <span class="user-role-badge" id="role-badge">{{ user.rol }}</span>
+                <span id="user-display-name" style="font-weight: 500;">{{ user.nombre }}</span>
+                <button class="btn-logout" onclick="handleLogout()">Salir</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- DYNAMIC DASHBOARD CONTAINER -->
+        <div class="dashboard-grid">
+            
+            <!-- LEFT PANEL: ROLE SPECIFIC CONTROLS -->
+            <div class="left-panel">
+                
+                <!-- DOCENTE: REGISTER AVAILABILITY FORM -->
+                <div id="panel-docente-crear" class="glass-card" style="display: none; margin-bottom: 2rem;">
+                    <h2 class="card-title">Registrar Disponibilidad</h2>
+                    <form id="form-disponibilidad" onsubmit="handleCreateDisponibilidad(event)">
+                        <div class="form-group">
+                            <label class="form-label" for="disp-fecha">Fecha</label>
+                            <input type="date" id="disp-fecha" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="disp-inicio">Hora de Inicio</label>
+                            <input type="time" id="disp-inicio" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="disp-fin">Hora de Fin</label>
+                            <input type="time" id="disp-fin" class="form-input" required>
+                        </div>
+                        <button type="submit" class="btn-primary">Añadir Horario</button>
+                    </form>
+                </div>
+
+                <!-- DOCENTE: AVAILABILITY LIST -->
+                <div id="panel-docente-lista" class="glass-card" style="display: none;">
+                    <h2 class="card-title">Mis Bloques Registrados</h2>
+                    <div class="slot-list" id="docente-slots-container">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- ESTUDIANTE: BOOK TUTORING SECTION -->
+                <div id="panel-estudiante-solicitar" class="glass-card" style="display: none;">
+                    <h2 class="card-title">Buscar Horarios Libres</h2>
+                    
+                    <!-- Advanced Filters (RF-08) -->
+                    <div style="margin-bottom: 1.5rem;">
+                        <div class="form-group">
+                            <label class="form-label" for="filter-search">Buscar Docente o Especialidad</label>
+                            <input type="text" id="filter-search" class="form-input" placeholder="Ej. Estructuras, Pérez..." oninput="filterAvailabilities()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="filter-fecha">Filtrar por Fecha</label>
+                            <input type="date" id="filter-fecha" class="form-input" onchange="filterAvailabilities()">
+                        </div>
+                    </div>
+
+                    <div class="slot-list" id="estudiante-slots-container">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT PANEL: HISTORIAL / SOLICITUDES LIST -->
+            <div class="right-panel">
+                <div class="glass-card wide">
+                    <h2 class="card-title" id="main-panel-title">Tutorías</h2>
+                    
+                    <!-- Tab filters to view by state (RF-06) -->
+                    <div class="tab-group" style="margin-bottom: 1.5rem;">
+                        <button class="tab-btn active" onclick="filterTutorias('Todas')">Todas</button>
+                        <button class="tab-btn" onclick="filterTutorias('Pendiente')">Pendientes</button>
+                        <button class="tab-btn" onclick="filterTutorias('Confirmada')">Confirmadas</button>
+                        <button class="tab-btn" onclick="filterTutorias('Finalizada')">Finalizadas</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr id="table-headers">
+                                    <!-- Dynamic headers depending on user role -->
+                                </tr>
+                            </thead>
+                            <tbody id="tutorias-table-body">
+                                <!-- Loaded dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- NOTIFICATION TOAST (RF-07) -->
+    <div id="toast" class="toast"></div>
+
+    <!-- MODAL FOR SOLICITAR TUTORIA -->
+    <div class="modal-overlay" id="solicitar-modal">
+        <div class="modal-content">
+            <h3 class="modal-header">Confirmar Solicitud de Tutoría</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;" id="modal-slot-detail"></p>
+            <form id="form-solicitar-confirm" onsubmit="submitSolicitarTutoria(event)">
+                <input type="hidden" id="modal-disponibilidad-id">
+                <div class="form-group">
+                    <label class="form-label" for="modal-motivo">Motivo Académico del Apoyo</label>
+                    <textarea id="modal-motivo" class="form-textarea" rows="4" required placeholder="Describe brevemente el tema o dudas a resolver..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('solicitar-modal')">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="width: auto;">Enviar Solicitud</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL FOR FINALIZAR TUTORIA -->
+    <div class="modal-overlay" id="finalizar-modal">
+        <div class="modal-content">
+            <h3 class="modal-header">Cierre Pedagógico de Tutoría</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;" id="modal-finalizar-detail"></p>
+            <form id="form-finalizar-confirm" onsubmit="submitFinalizarTutoria(event)">
+                <input type="hidden" id="modal-tutoria-id">
+                <div class="form-group">
+                    <label class="form-label" for="modal-observaciones">Observaciones Pedagógicas (Obligatorio)</label>
+                    <textarea id="modal-observaciones" class="form-textarea" rows="4" required placeholder="Escribe el diagnóstico pedagógico, recomendaciones o temas abordados..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('finalizar-modal')">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="width: auto;">Finalizar Tutoría</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL FOR EXPORTING REPORT (RF-09) -->
+    <div class="modal-overlay" id="report-modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div id="print-area">
+                <h3 style="border-bottom: 2px solid var(--accent-blue); padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.4rem;">
+                    Comprobante de Tutoría Concluida
+                </h3>
+                <div style="font-size: 0.95rem; line-height: 1.6;" id="report-content">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeModal('report-modal')">Cerrar</button>
+                <button type="button" class="btn-primary" style="width: auto;" onclick="window.print()">Imprimir / PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Set context and load dashboard
+        window.currentUserId = {{ user.id }};
+        window.currentUserRol = "{{ user.rol }}";
+        
+        initDashboard();
+    </script>
+</body>
+</html>

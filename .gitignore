@@ -1,0 +1,21 @@
+# Databases
+*.db
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# OS/IDE
+.vscode/
+.idea/
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Documents
+*.pdf

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Tutorías Académicas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="bg-gradient-glow"></div>
+    
+    <header>
+        <div class="nav-container">
+            <div class="logo">TUTORÍAS ACADÉMICAS</div>
+        </div>
+    </header>
+
+    <main>
+        <div class="auth-wrapper">
+            <div class="glass-card">
+                <div class="auth-header">
+                    <h1 class="auth-title">Sistema de Gestión</h1>
+                    <p class="auth-subtitle">Accede o crea una cuenta para coordinar tus tutorías</p>
+                </div>
+
+                <div class="tab-group">
+                    <button class="tab-btn active" id="tab-login" onclick="switchTab('login')">Iniciar Sesión</button>
+                    <button class="tab-btn" id="tab-register" onclick="switchTab('register')">Registrarse</button>
+                </div>
+
+                <!-- LOGIN FORM -->
+                <form id="form-login-el" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="login-email">Correo Electrónico</label>
+                        <input type="email" id="login-email" class="form-input" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="login-password">Contraseña</label>
+                        <input type="password" id="login-password" class="form-input" required autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn-primary">Entrar</button>
+                </form>
+
+                <!-- REGISTER FORM -->
+                <form id="form-register-el" onsubmit="handleRegister(event)" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label" for="reg-nombre">Nombre Completo</label>
+                        <input type="text" id="reg-nombre" class="form-input" required autocomplete="name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reg-email">Correo Electrónico</label>
+                        <input type="email" id="reg-email" class="form-input" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reg-password">Contraseña</label>
+                        <input type="password" id="reg-password" class="form-input" required autocomplete="new-password">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reg-rol">Tipo de Usuario</label>
+                        <select id="reg-rol" class="form-select" onchange="toggleRoleFields()" required>
+                            <option value="Estudiante">Estudiante</option>
+                            <option value="Docente">Docente</option>
+                        </select>
+                    </div>
+
+                    <!-- Estudiante specific fields -->
+                    <div id="fields-estudiante">
+                        <div class="form-group">
+                            <label class="form-label" for="reg-matricula">Matrícula</label>
+                            <input type="text" id="reg-matricula" class="form-input" placeholder="Ej. A01234567">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="reg-carrera">Carrera</label>
+                            <input type="text" id="reg-carrera" class="form-input" placeholder="Ej. Ingeniería de Software">
+                        </div>
+                    </div>
+
+                    <!-- Docente specific fields -->
+                    <div id="fields-docente" style="display: none;">
+                        <div class="form-group">
+                            <label class="form-label" for="reg-especialidad">Especialidad</label>
+                            <input type="text" id="reg-especialidad" class="form-input" placeholder="Ej. Estructuras de Datos">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="reg-cubiculo">Cubículo / Oficina</label>
+                            <input type="text" id="reg-cubiculo" class="form-input" placeholder="Ej. Edificio B - 204">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Crear Cuenta</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        // Init view states
+        toggleRoleFields();
+    </script>
+</body>
+</html>

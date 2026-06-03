@@ -249,6 +249,19 @@ main {
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: 2.5rem;
+    align-items: stretch;
+}
+
+.left-panel, .right-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.left-panel > .glass-card, .right-panel > .glass-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 @media (max-width: 968px) {

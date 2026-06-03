@@ -29,7 +29,7 @@ El sistema cuenta con un diseño minimalista, profesional, responsive y sin emoj
 ## Documentación del Proyecto
 
 El archivo original de requerimientos y priorización está disponible y es descargable directamente en el repositorio:
-*   [Requerimientos y Priorización de Tutorías Académicas (DOCX)](./Requerimientos_y_Priorizacion_Tutorias_Academicas.docx)
+*   [Requerimientos y Priorización de Tutorías Académicas (DOCX)](https://github.com/SoyPhilips/sistema-gestion-tutorias-academicas/raw/main/docs/Requerimientos_y_Priorizacion_Tutorias_Academicas.docx)
 
 ---
 

@@ -55,35 +55,17 @@
                         <label class="form-label" for="reg-password">Contraseña</label>
                         <input type="password" id="reg-password" class="form-input" required autocomplete="new-password">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" for="reg-rol">Tipo de Usuario</label>
-                        <select id="reg-rol" class="form-select" onchange="toggleRoleFields()" required>
-                            <option value="Estudiante">Estudiante</option>
-                            <option value="Docente">Docente</option>
-                        </select>
-                    </div>
+                    <input type="hidden" id="reg-rol" value="Estudiante">
 
                     <!-- Estudiante specific fields -->
                     <div id="fields-estudiante">
                         <div class="form-group">
                             <label class="form-label" for="reg-matricula">Matrícula</label>
-                            <input type="text" id="reg-matricula" class="form-input" placeholder="Ej. A01234567">
+                            <input type="text" id="reg-matricula" class="form-input" required placeholder="Ej. A01234567">
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="reg-carrera">Carrera</label>
-                            <input type="text" id="reg-carrera" class="form-input" placeholder="Ej. Ingeniería de Software">
-                        </div>
-                    </div>
-
-                    <!-- Docente specific fields -->
-                    <div id="fields-docente" style="display: none;">
-                        <div class="form-group">
-                            <label class="form-label" for="reg-especialidad">Especialidad</label>
-                            <input type="text" id="reg-especialidad" class="form-input" placeholder="Ej. Estructuras de Datos">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="reg-cubiculo">Cubículo / Oficina</label>
-                            <input type="text" id="reg-cubiculo" class="form-input" placeholder="Ej. Edificio B - 204">
+                            <input type="text" id="reg-carrera" class="form-input" required placeholder="Ej. Ingeniería de Software">
                         </div>
                     </div>
 
@@ -98,7 +80,6 @@
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
         // Init view states
-        toggleRoleFields();
     </script>
 </body>
 </html>

@@ -46,9 +46,12 @@ function switchTab(type) {
 }
 
 function toggleRoleFields() {
-    const rol = document.getElementById('reg-rol').value;
+    const regRolEl = document.getElementById('reg-rol');
+    if (!regRolEl) return;
+    const rol = regRolEl.value;
     const fieldsEst = document.getElementById('fields-estudiante');
     const fieldsDoc = document.getElementById('fields-docente');
+    if (!fieldsEst || !fieldsDoc) return;
     
     const inputMatricula = document.getElementById('reg-matricula');
     const inputCarrera = document.getElementById('reg-carrera');

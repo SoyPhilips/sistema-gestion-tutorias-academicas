@@ -63,6 +63,15 @@ def init_db():
         );
     ''')
     
+    # Insert default Docente if not exists
+    cursor.execute("SELECT id FROM usuarios WHERE email = 'docente@prueba.com'")
+    if not cursor.fetchone():
+        pwd_hash = generate_password_hash("password123")
+        cursor.execute('''
+            INSERT INTO usuarios (nombre, email, password_hash, rol, especialidad, cubiculo)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', ("Docente de Prueba", "docente@prueba.com", pwd_hash, "Docente", "Ciencias de la Computación", "Cubículo 201"))
+        
     conn.commit()
     conn.close()
 

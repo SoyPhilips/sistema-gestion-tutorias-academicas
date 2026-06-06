@@ -2,6 +2,7 @@ import unittest
 import os
 import sqlite3
 import json
+import time
 from app import app, init_db, DATABASE
 
 class AcademicTutoringTestCase(unittest.TestCase):
@@ -46,6 +47,7 @@ class AcademicTutoringTestCase(unittest.TestCase):
                                 content_type='application/json')
 
     def test_workflow(self):
+        start_time = time.time()
         # 1. Register Docente
         resp = self.register_user(
             nombre="Dr. Alan Turing",
@@ -73,6 +75,8 @@ class AcademicTutoringTestCase(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         
         # 4. Create Availability Block (Docente)
+        print("creando tutoria")
+        time.sleep(0.5)
         resp = self.client.post('/api/docente/disponibilidad',
                                 data=json.dumps({
                                     'fecha': '2026-06-10',
@@ -81,6 +85,8 @@ class AcademicTutoringTestCase(unittest.TestCase):
                                 }),
                                 content_type='application/json')
         self.assertEqual(resp.status_code, 201)
+        print("tutoria creada")
+        time.sleep(0.4)
         
         # Logout Docente
         self.client.post('/api/auth/logout')
@@ -97,6 +103,8 @@ class AcademicTutoringTestCase(unittest.TestCase):
         disp_id = availabilities[0]['id']
         
         # 6. Request Tutoring Session (Estudiante)
+        print("estudiante matricualandose a la tutoria tal")
+        time.sleep(0.5)
         resp = self.client.post('/api/tutorias',
                                 data=json.dumps({
                                     'disponibilidad_id': disp_id,
@@ -104,6 +112,7 @@ class AcademicTutoringTestCase(unittest.TestCase):
                                 }),
                                 content_type='application/json')
         self.assertEqual(resp.status_code, 201)
+        print("inscripcion completa")
         
         # RD-01 Check: Requesting another tutoring in the same slot should fail
         resp = self.client.post('/api/tutorias',
@@ -165,6 +174,9 @@ class AcademicTutoringTestCase(unittest.TestCase):
         tutorias_final = json.loads(resp.data)
         self.assertEqual(tutorias_final[0]['estado'], 'Finalizada')
         self.assertEqual(tutorias_final[0]['observaciones'], 'Se repasó la teoría del problema de la parada. El estudiante demostró buena comprensión.')
+        
+        elapsed = time.time() - start_time
+        print(f"TEST COMPLETADO tiempo de test, {elapsed:.2f}sec")
 
 if __name__ == '__main__':
     unittest.main()

@@ -40,7 +40,45 @@ body {
     overflow-x: hidden;
 }
 
-/* Background Gradients with animation */
+/* Login page full-screen background image */
+.login-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/static/login_bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: -2;
+    pointer-events: none;
+    animation: slowZoom 30s ease infinite alternate;
+}
+
+/* Dark overlay so the glass card stays readable */
+.login-bg-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(7, 9, 19, 0.72) 0%,
+        rgba(13, 17, 34, 0.55) 50%,
+        rgba(7, 9, 19, 0.75) 100%
+    );
+    z-index: -1;
+    pointer-events: none;
+}
+
+@keyframes slowZoom {
+    from { transform: scale(1); }
+    to   { transform: scale(1.06); }
+}
+
+/* Background Gradients with animation (dashboard only) */
 .bg-gradient-glow {
     position: fixed;
     top: -10%;
@@ -181,6 +219,13 @@ main {
     border-color: var(--border-hover);
     box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.6), 0 0 30px 2px rgba(99, 102, 241, 0.12);
     transform: translateY(-2px);
+}
+
+/* On the login page, make the card denser against the photo background */
+.login-page .glass-card {
+    background-color: rgba(7, 9, 19, 0.78);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(99, 102, 241, 0.15);
 }
 
 .glass-card.wide {

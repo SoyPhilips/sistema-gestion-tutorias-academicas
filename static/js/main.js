@@ -99,12 +99,13 @@ async function handleLogin(e) {
 
 async function handleRegister(e) {
     e.preventDefault();
-    const nombre = document.getElementById('reg-nombre').value;
+    const nombres = document.getElementById('reg-nombres').value;
+    const apellidos = document.getElementById('reg-apellidos').value;
     const email = document.getElementById('reg-email').value;
     const password = document.getElementById('reg-password').value;
     const rol = document.getElementById('reg-rol').value;
     
-    const body = { nombre, email, password, rol };
+    const body = { nombres, apellidos, email, password, rol };
     
     if (rol === 'Estudiante') {
         body.matricula = document.getElementById('reg-matricula').value;

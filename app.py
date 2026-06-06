@@ -23,6 +23,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS usuarios (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT NOT NULL,
+            nombres TEXT,
+            apellidos TEXT,
             email TEXT NOT NULL UNIQUE,
             password_hash TEXT NOT NULL,
             rol TEXT NOT NULL CHECK(rol IN ('Estudiante', 'Docente')),
@@ -32,6 +34,14 @@ def init_db():
             cubiculo TEXT
         );
     ''')
+    
+    # Check if 'nombres' and 'apellidos' columns exist (schema migration helper)
+    cursor.execute("PRAGMA table_info(usuarios);")
+    columns = [row[1] for row in cursor.fetchall()]
+    if 'nombres' not in columns:
+        cursor.execute("ALTER TABLE usuarios ADD COLUMN nombres TEXT;")
+    if 'apellidos' not in columns:
+        cursor.execute("ALTER TABLE usuarios ADD COLUMN apellidos TEXT;")
     
     # Create disponibilidades table
     cursor.execute('''
@@ -68,9 +78,9 @@ def init_db():
     if not cursor.fetchone():
         pwd_hash = generate_password_hash("password123")
         cursor.execute('''
-            INSERT INTO usuarios (nombre, email, password_hash, rol, especialidad, cubiculo)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', ("Docente de Prueba", "docente@prueba.com", pwd_hash, "Docente", "Ciencias de la Computación", "Cubículo 201"))
+            INSERT INTO usuarios (nombre, nombres, apellidos, email, password_hash, rol, especialidad, cubiculo)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', ("Docente de Prueba", "Docente", "de Prueba", "docente@prueba.com", pwd_hash, "Docente", "Ciencias de la Computación", "Cubículo 201"))
         
     conn.commit()
     conn.close()
@@ -105,17 +115,26 @@ def register():
     if not data:
         return jsonify({'error': 'Datos no proporcionados'}), 400
     
-    nombre = data.get('nombre', '').strip()
+    nombres = data.get('nombres', '').strip()
+    apellidos = data.get('apellidos', '').strip()
+    if not nombres and not apellidos:
+        full_name = data.get('nombre', '').strip()
+        if full_name:
+            parts = full_name.split(' ', 1)
+            nombres = parts[0]
+            apellidos = parts[1] if len(parts) > 1 else ''
+            
     email = data.get('email', '').strip()
     password = data.get('password', '')
     rol = data.get('rol', '')
     
-    if not nombre or not email or not password or not rol:
+    if not nombres or not email or not password or not rol:
         return jsonify({'error': 'Todos los campos básicos son obligatorios'}), 400
         
     if rol not in ('Estudiante', 'Docente'):
         return jsonify({'error': 'Rol inválido'}), 400
         
+    nombre = f"{nombres} {apellidos}".strip()
     password_hash = generate_password_hash(password)
     
     matricula = data.get('matricula', '').strip() if rol == 'Estudiante' else None
@@ -132,9 +151,9 @@ def register():
     cursor = conn.cursor()
     try:
         cursor.execute('''
-            INSERT INTO usuarios (nombre, email, password_hash, rol, matricula, carrera, especialidad, cubiculo)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (nombre, email, password_hash, rol, matricula, carrera, especialidad, cubiculo))
+            INSERT INTO usuarios (nombre, nombres, apellidos, email, password_hash, rol, matricula, carrera, especialidad, cubiculo)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (nombre, nombres, apellidos, email, password_hash, rol, matricula, carrera, especialidad, cubiculo))
         conn.commit()
         return jsonify({'message': 'Usuario registrado exitosamente'}), 201
     except sqlite3.IntegrityError:

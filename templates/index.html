@@ -43,9 +43,15 @@
 
                 <!-- REGISTER FORM -->
                 <form id="form-register-el" onsubmit="handleRegister(event)" style="display: none;">
-                    <div class="form-group">
-                        <label class="form-label" for="reg-nombre">Nombre Completo</label>
-                        <input type="text" id="reg-nombre" class="form-input" required autocomplete="name">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="reg-nombres">Nombres</label>
+                            <input type="text" id="reg-nombres" class="form-input" required autocomplete="given-name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="reg-apellidos">Apellidos</label>
+                            <input type="text" id="reg-apellidos" class="form-input" required autocomplete="family-name">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="reg-email">Correo Electrónico</label>

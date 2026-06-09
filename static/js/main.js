@@ -575,10 +575,8 @@ function openReportModal(tutoriaId) {
     const tutoria = allTutorias.find(t => t.id === tutoriaId);
     if (!tutoria) return;
     
-    const container = document.getElementById('report-content');
     const now = new Date().toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' });
     
-    // Build the role-specific detail grid cells
     let detailCells = '';
     if (window.currentUserRol === 'Docente') {
         detailCells = `
@@ -620,59 +618,249 @@ function openReportModal(tutoriaId) {
         `;
     }
     
-    container.innerHTML = `
-        <div class="invoice-doc">
-
-            <!-- ── Header ── -->
-            <div class="invoice-header">
-                <div class="invoice-brand">
-                    <span class="invoice-brand-name">TUTORÍAS ACADÉMICAS</span>
-                    <span class="invoice-brand-sub">Sistema de Gestión Académica</span>
-                </div>
-                <span class="invoice-official-badge">COMPROBANTE OFICIAL</span>
+    const reportHtml = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Comprobante de Tutoría - #TUT-${tutoria.id}</title>
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #ffffff;
+            color: #111827;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+        .invoice-doc {
+            width: 100%;
+            max-width: 660px;
+            padding: 2.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            background: #fff;
+        }
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.4rem;
+        }
+        .invoice-brand-name {
+            display: block;
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            color: #1e1b4b;
+        }
+        .invoice-brand-sub {
+            display: block;
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.2rem;
+        }
+        .invoice-official-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 0.35rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid #c7d2fe;
+            color: #3730a3;
+            background: #f0fdf4;
+            white-space: nowrap;
+        }
+        .invoice-rule {
+            height: 1px;
+            background: #c7d2fe;
+            margin-bottom: 1.4rem;
+        }
+        .invoice-title-block {
+            margin-bottom: 1.4rem;
+        }
+        .invoice-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin: 0 0 0.3rem 0;
+            color: #111827;
+        }
+        .invoice-ref {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin: 0;
+        }
+        .invoice-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.7rem;
+            margin-bottom: 1.1rem;
+        }
+        .inv-field {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 0.8rem 0.95rem;
+        }
+        .inv-field.inv-full {
+            grid-column: 1 / -1;
+        }
+        .inv-label {
+            display: block;
+            font-size: 0.67rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #9ca3af;
+            margin-bottom: 0.3rem;
+        }
+        .inv-value {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #111827;
+            line-height: 1.45;
+        }
+        .invoice-status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.7rem 1rem;
+            border-radius: 8px;
+            border: 1px solid #bbf7d0;
+            background: #f0fdf4;
+            margin-bottom: 1.1rem;
+            font-size: 0.82rem;
+        }
+        .invoice-status-label {
+            color: #374151;
+            font-weight: 500;
+        }
+        .status-badge {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            border: 1px solid #bbf7d0;
+            background: #dcfce7;
+            color: #166534;
+        }
+        .invoice-obs-block {
+            border-left: 3px solid #6366f1;
+            padding: 0.9rem 1.1rem;
+            margin-bottom: 1.4rem;
+            background: #eef2ff;
+            border-radius: 0 8px 8px 0;
+        }
+        .invoice-obs-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #4338ca;
+            margin: 0 0 0.6rem 0;
+        }
+        .invoice-obs-text {
+            font-size: 0.9rem;
+            line-height: 1.7;
+            font-style: italic;
+            color: #374151;
+            margin: 0;
+        }
+        .invoice-footer {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 0.9rem;
+            font-size: 0.73rem;
+            color: #6b7280;
+            line-height: 1.65;
+        }
+        .invoice-timestamp {
+            margin: 0.3rem 0 0 0;
+            font-weight: 500;
+            color: #374151;
+        }
+        @media print {
+            body {
+                padding: 0;
+            }
+            .invoice-doc {
+                border: none;
+                box-shadow: none;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-doc">
+        <!-- Header -->
+        <div class="invoice-header">
+            <div class="invoice-brand">
+                <span class="invoice-brand-name">TUTORÍAS ACADÉMICAS</span>
+                <span class="invoice-brand-sub">Sistema de Gestión Académica</span>
             </div>
-
-            <div class="invoice-rule"></div>
-
-            <!-- ── Document title ── -->
-            <div class="invoice-title-block">
-                <h2 class="invoice-title">Cierre de Tutoría Académica</h2>
-                <p class="invoice-ref">Referencia&nbsp;#TUT-${tutoria.id} &bull; Emitido el ${now}</p>
-            </div>
-
-            <!-- ── Detail grid ── -->
-            <div class="invoice-grid">
-                ${detailCells}
-                <div class="inv-field inv-full">
-                    <span class="inv-label">Fecha y Bloque Horario</span>
-                    <span class="inv-value">${escapeHTML(tutoria.fecha_hora)}</span>
-                </div>
-                <div class="inv-field inv-full">
-                    <span class="inv-label">Motivo de la Tutoría</span>
-                    <span class="inv-value">${escapeHTML(tutoria.motivo)}</span>
-                </div>
-            </div>
-
-            <!-- ── Status row ── -->
-            <div class="invoice-status-row">
-                <span class="invoice-status-label">Estado de la Sesión</span>
-                <span class="status-badge status-finalizada">${escapeHTML(tutoria.estado)}</span>
-            </div>
-
-            <!-- ── Observations ── -->
-            <div class="invoice-obs-block">
-                <h4 class="invoice-obs-title">Observaciones y Diagnóstico Pedagógico</h4>
-                <p class="invoice-obs-text">&ldquo;${escapeHTML(tutoria.observaciones)}&rdquo;</p>
-            </div>
-
-            <!-- ── Footer ── -->
-            <div class="invoice-footer">
-                <p>Documento generado digitalmente por el Sistema de Gestión de Tutorías Académicas. Su contenido es de carácter académico e informativo.</p>
-                <p class="invoice-timestamp">Generado el: ${now}</p>
-            </div>
-
+            <span class="invoice-official-badge">COMPROBANTE OFICIAL</span>
         </div>
+
+        <div class="invoice-rule"></div>
+
+        <!-- Document title -->
+        <div class="invoice-title-block">
+            <h2 class="invoice-title">Cierre de Tutoría Académica</h2>
+            <p class="invoice-ref">Referencia&nbsp;#TUT-${tutoria.id} &bull; Emitido el ${now}</p>
+        </div>
+
+        <!-- Detail grid -->
+        <div class="invoice-grid">
+            ${detailCells}
+            <div class="inv-field inv-full">
+                <span class="inv-label">Fecha y Bloque Horario</span>
+                <span class="inv-value">${escapeHTML(tutoria.fecha_hora)}</span>
+            </div>
+            <div class="inv-field inv-full">
+                <span class="inv-label">Motivo de la Tutoría</span>
+                <span class="inv-value">${escapeHTML(tutoria.motivo)}</span>
+            </div>
+        </div>
+
+        <!-- Status row -->
+        <div class="invoice-status-row">
+            <span class="invoice-status-label">Estado de la Sesión</span>
+            <span class="status-badge">${escapeHTML(tutoria.estado)}</span>
+        </div>
+
+        <!-- Observations -->
+        <div class="invoice-obs-block">
+            <h4 class="invoice-obs-title">Observaciones y Diagnóstico Pedagógico</h4>
+            <p class="invoice-obs-text">&ldquo;${escapeHTML(tutoria.observaciones)}&rdquo;</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="invoice-footer">
+            <p style="margin: 0 0 0.3rem 0;">Documento generado digitalmente por el Sistema de Gestión de Tutorías Académicas. Su contenido es de carácter académico e informativo.</p>
+            <p class="invoice-timestamp">Generado el: ${now}</p>
+        </div>
+    </div>
+    <script>
+        window.onload = function() {
+            window.print();
+        };
+    </script>
+</body>
+</html>
     `;
     
-    openModal('report-modal');
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+        printWindow.document.write(reportHtml);
+        printWindow.document.close();
+        printWindow.focus();
+    } else {
+        showToast('El navegador bloqueó la ventana emergente del comprobante.');
+    }
 }

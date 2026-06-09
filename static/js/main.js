@@ -251,17 +251,94 @@ function renderDocenteAvailabilities(slots) {
         return;
     }
     
-    container.innerHTML = slots.map(slot => `
-        <div class="slot-item">
-            <div class="slot-info">
-                <span class="slot-time">${escapeHTML(slot.fecha)}</span>
-                <span class="slot-meta">${escapeHTML(slot.hora_inicio)} - ${escapeHTML(slot.hora_fin)}</span>
+    container.innerHTML = slots.map(slot => {
+        // Use computed estado_efectivo for display; fallback to stored estado
+        const efectivo = slot.estado_efectivo || slot.estado;
+        // Edit/Delete only allowed when the underlying stored estado is 'Libre'
+        const isEditable = slot.estado === 'Libre';
+        
+        let badgeClass = 'status-confirmada'; // Libre -> green
+        if (efectivo === 'Ocupado')    badgeClass = 'status-pendiente';
+        if (efectivo === 'Expirada')   badgeClass = 'status-expirada';
+        if (efectivo === 'Finalizada') badgeClass = 'status-finalizada';
+        
+        const editBtns = isEditable ? `
+            <button class="btn-icon-edit" title="Editar horario"
+                onclick="openEditDisponibilidadModal(${slot.id}, '${escapeHTML(slot.fecha)}', '${escapeHTML(slot.hora_inicio)}', '${escapeHTML(slot.hora_fin)}')">&#9998;</button>
+            <button class="btn-icon-delete" title="Eliminar horario"
+                onclick="handleDeleteDisponibilidad(${slot.id})">&#x2715;</button>
+        ` : '';
+        
+        return `
+            <div class="slot-item">
+                <div class="slot-info">
+                    <span class="slot-time">${escapeHTML(slot.fecha)}</span>
+                    <span class="slot-meta">${escapeHTML(slot.hora_inicio)} - ${escapeHTML(slot.hora_fin)}</span>
+                </div>
+                <div class="slot-actions">
+                    <span class="status-badge ${badgeClass}">${escapeHTML(efectivo)}</span>
+                    ${editBtns}
+                </div>
             </div>
-            <span class="status-badge status-${slot.estado === 'Libre' ? 'confirmada' : 'pendiente'}">
-                ${escapeHTML(slot.estado)}
-            </span>
-        </div>
-    `).join('');
+        `;
+    }).join('');
+}
+
+// --- EDIT / DELETE DISPONIBILIDAD ---
+
+function openEditDisponibilidadModal(id, fecha, horaInicio, horaFin) {
+    document.getElementById('edit-disp-id').value = id;
+    document.getElementById('edit-disp-fecha').value = fecha;
+    document.getElementById('edit-disp-inicio').value = horaInicio;
+    document.getElementById('edit-disp-fin').value = horaFin;
+    // Enforce future-only
+    document.getElementById('edit-disp-fecha').min = new Date().toISOString().split('T')[0];
+    openModal('edit-disp-modal');
+}
+
+async function handleEditDisponibilidad(e) {
+    e.preventDefault();
+    const id          = document.getElementById('edit-disp-id').value;
+    const fecha       = document.getElementById('edit-disp-fecha').value;
+    const hora_inicio = document.getElementById('edit-disp-inicio').value;
+    const hora_fin    = document.getElementById('edit-disp-fin').value;
+    
+    try {
+        const response = await fetch(`/api/docente/disponibilidad/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fecha, hora_inicio, hora_fin })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            showToast('Horario actualizado correctamente');
+            closeModal('edit-disp-modal');
+            loadDocenteAvailabilities();
+        } else {
+            showToast(data.error || 'Error al actualizar');
+        }
+    } catch (err) {
+        showToast('Error de conexión');
+    }
+}
+
+async function handleDeleteDisponibilidad(id) {
+    if (!confirm('¿Eliminar este bloque de disponibilidad? Esta acción no se puede deshacer.')) return;
+    
+    try {
+        const response = await fetch(`/api/docente/disponibilidad/${id}`, {
+            method: 'DELETE'
+        });
+        const data = await response.json();
+        if (response.ok) {
+            showToast('Bloque eliminado correctamente');
+            loadDocenteAvailabilities();
+        } else {
+            showToast(data.error || 'Error al eliminar');
+        }
+    } catch (err) {
+        showToast('Error de conexión');
+    }
 }
 
 // --- ESTUDIANTE SOLICITAR HANDLERS ---
@@ -492,39 +569,108 @@ function submitFinalizarTutoria(e) {
     updateStatus(id, 'Finalizada', obs);
 }
 
-// --- REPORT EXPORT HANDLER (RF-09) ---
+// --- REPORT EXPORT HANDLER (RF-09) – Premium Invoice ---
 
 function openReportModal(tutoriaId) {
     const tutoria = allTutorias.find(t => t.id === tutoriaId);
     if (!tutoria) return;
     
     const container = document.getElementById('report-content');
+    const now = new Date().toLocaleString('es-ES', { dateStyle: 'long', timeStyle: 'short' });
     
-    let userDetails = '';
+    // Build the role-specific detail grid cells
+    let detailCells = '';
     if (window.currentUserRol === 'Docente') {
-        userDetails = `
-            <p><strong>Estudiante:</strong> ${escapeHTML(tutoria.estudiante_nombre)}</p>
-            <p><strong>Matrícula:</strong> ${escapeHTML(tutoria.matricula)}</p>
-            <p><strong>Carrera:</strong> ${escapeHTML(tutoria.carrera)}</p>
+        detailCells = `
+            <div class="inv-field">
+                <span class="inv-label">Docente</span>
+                <span class="inv-value">${escapeHTML(window.currentUserNombre || '')}</span>
+            </div>
+            <div class="inv-field">
+                <span class="inv-label">Estudiante</span>
+                <span class="inv-value">${escapeHTML(tutoria.estudiante_nombre)}</span>
+            </div>
+            <div class="inv-field">
+                <span class="inv-label">Carrera</span>
+                <span class="inv-value">${escapeHTML(tutoria.carrera)}</span>
+            </div>
+            <div class="inv-field">
+                <span class="inv-label">Matrícula</span>
+                <span class="inv-value">${escapeHTML(tutoria.matricula)}</span>
+            </div>
         `;
     } else {
-        userDetails = `
-            <p><strong>Docente:</strong> ${escapeHTML(tutoria.docente_nombre)}</p>
-            <p><strong>Especialidad:</strong> ${escapeHTML(tutoria.especialidad)}</p>
-            <p><strong>Cubículo:</strong> ${escapeHTML(tutoria.cubiculo)}</p>
+        detailCells = `
+            <div class="inv-field">
+                <span class="inv-label">Docente</span>
+                <span class="inv-value">${escapeHTML(tutoria.docente_nombre)}</span>
+            </div>
+            <div class="inv-field">
+                <span class="inv-label">Especialidad</span>
+                <span class="inv-value">${escapeHTML(tutoria.especialidad)}</span>
+            </div>
+            <div class="inv-field">
+                <span class="inv-label">Cubículo</span>
+                <span class="inv-value">${escapeHTML(tutoria.cubiculo)}</span>
+            </div>
+            <div class="inv-field">
+                <span class="inv-label">Estado</span>
+                <span class="inv-value">${escapeHTML(tutoria.estado)}</span>
+            </div>
         `;
     }
     
     container.innerHTML = `
-        <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem;">
-            ${userDetails}
-            <p><strong>Fecha y Hora:</strong> ${escapeHTML(tutoria.fecha_hora)}</p>
-            <p><strong>Motivo de la Tutoría:</strong> ${escapeHTML(tutoria.motivo)}</p>
-            <p><strong>Estado:</strong> <span class="status-badge status-finalizada">${escapeHTML(tutoria.estado)}</span></p>
-        </div>
-        <div style="border-left: 4px solid var(--accent-blue); padding-left: 1rem; margin-top: 1rem;">
-            <h4 style="margin-bottom: 0.5rem; color: var(--accent-blue);">Observaciones Pedagógicas y Seguimiento</h4>
-            <p style="font-style: italic;">"${escapeHTML(tutoria.observaciones)}"</p>
+        <div class="invoice-doc">
+
+            <!-- ── Header ── -->
+            <div class="invoice-header">
+                <div class="invoice-brand">
+                    <span class="invoice-brand-name">TUTORÍAS ACADÉMICAS</span>
+                    <span class="invoice-brand-sub">Sistema de Gestión Académica</span>
+                </div>
+                <span class="invoice-official-badge">COMPROBANTE OFICIAL</span>
+            </div>
+
+            <div class="invoice-rule"></div>
+
+            <!-- ── Document title ── -->
+            <div class="invoice-title-block">
+                <h2 class="invoice-title">Cierre de Tutoría Académica</h2>
+                <p class="invoice-ref">Referencia&nbsp;#TUT-${tutoria.id} &bull; Emitido el ${now}</p>
+            </div>
+
+            <!-- ── Detail grid ── -->
+            <div class="invoice-grid">
+                ${detailCells}
+                <div class="inv-field inv-full">
+                    <span class="inv-label">Fecha y Bloque Horario</span>
+                    <span class="inv-value">${escapeHTML(tutoria.fecha_hora)}</span>
+                </div>
+                <div class="inv-field inv-full">
+                    <span class="inv-label">Motivo de la Tutoría</span>
+                    <span class="inv-value">${escapeHTML(tutoria.motivo)}</span>
+                </div>
+            </div>
+
+            <!-- ── Status row ── -->
+            <div class="invoice-status-row">
+                <span class="invoice-status-label">Estado de la Sesión</span>
+                <span class="status-badge status-finalizada">${escapeHTML(tutoria.estado)}</span>
+            </div>
+
+            <!-- ── Observations ── -->
+            <div class="invoice-obs-block">
+                <h4 class="invoice-obs-title">Observaciones y Diagnóstico Pedagógico</h4>
+                <p class="invoice-obs-text">&ldquo;${escapeHTML(tutoria.observaciones)}&rdquo;</p>
+            </div>
+
+            <!-- ── Footer ── -->
+            <div class="invoice-footer">
+                <p>Documento generado digitalmente por el Sistema de Gestión de Tutorías Académicas. Su contenido es de carácter académico e informativo.</p>
+                <p class="invoice-timestamp">Generado el: ${now}</p>
+            </div>
+
         </div>
     `;
     

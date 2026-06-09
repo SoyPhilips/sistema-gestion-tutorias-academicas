@@ -704,3 +704,307 @@ tr:last-child td {
     font-size: 0.925rem;
     font-weight: 400;
 }
+
+/* ───────────────────────────────────────────────────
+   Slot Actions Row (Docente Availability List)
+─────────────────────────────────────────────────── */
+.slot-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-shrink: 0;
+}
+
+.status-expirada {
+    background-color: rgba(100, 116, 139, 0.12);
+    color: #94a3b8;
+    border: 1px solid rgba(100, 116, 139, 0.25);
+    box-shadow: none;
+}
+
+/* Edit icon button (pencil) */
+.btn-icon-edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    background: rgba(99, 102, 241, 0.1);
+    color: #a5b4fc;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-icon-edit:hover {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: #fff;
+    box-shadow: 0 0 14px rgba(99, 102, 241, 0.45);
+    transform: scale(1.08);
+}
+
+/* Delete icon button (cross) */
+.btn-icon-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    border: 1px solid rgba(244, 63, 94, 0.35);
+    background: rgba(244, 63, 94, 0.1);
+    color: #fb7185;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-icon-delete:hover {
+    background: var(--accent-rose);
+    border-color: var(--accent-rose);
+    color: #fff;
+    box-shadow: 0 0 14px rgba(244, 63, 94, 0.45);
+    transform: scale(1.08);
+}
+
+/* ───────────────────────────────────────────────────
+   Premium Invoice / Comprobante Styles
+─────────────────────────────────────────────────── */
+.invoice-doc {
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+}
+
+.invoice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.4rem;
+}
+
+.invoice-brand-name {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, #e0e7ff 40%, #a5b4fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.invoice-brand-sub {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+    letter-spacing: 0.02em;
+}
+.invoice-official-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.8rem;
+    border-radius: 6px;
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    color: #a5b4fc;
+    background: rgba(99, 102, 241, 0.1);
+    white-space: nowrap;
+}
+
+.invoice-rule {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5) 40%, rgba(16, 185, 129, 0.3) 70%, transparent);
+    margin-bottom: 1.4rem;
+}
+
+.invoice-title-block {
+    margin-bottom: 1.4rem;
+}
+.invoice-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.3rem;
+}
+.invoice-ref {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0.01em;
+}
+
+/* 2-column grid for fields */
+.invoice-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.7rem;
+    margin-bottom: 1.1rem;
+}
+.inv-field {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.8rem 0.95rem;
+}
+.inv-field.inv-full {
+    grid-column: 1 / -1;
+}
+.inv-label {
+    display: block;
+    font-size: 0.67rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+}
+.inv-value {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.45;
+}
+
+/* Status indicator bar */
+.invoice-status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: rgba(16, 185, 129, 0.04);
+    margin-bottom: 1.1rem;
+    font-size: 0.82rem;
+}
+.invoice-status-label {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Observations block */
+.invoice-obs-block {
+    border-left: 3px solid var(--accent-blue);
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 1.4rem;
+    background: rgba(99, 102, 241, 0.04);
+    border-radius: 0 8px 8px 0;
+}
+.invoice-obs-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #a5b4fc;
+    margin-bottom: 0.6rem;
+}
+.invoice-obs-text {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    font-style: italic;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Document footer */
+.invoice-footer {
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.9rem;
+    font-size: 0.73rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+}
+.invoice-timestamp {
+    margin-top: 0.3rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* ───────────────────────────────────────────────────
+   Print Styles — clean white document output
+─────────────────────────────────────────────────── */
+@media print {
+    /* Hide everything except the report modal */
+    body > *:not(#report-modal) { display: none !important; }
+
+    /* Reset the overlay chrome */
+    .modal-overlay {
+        position: static !important;
+        background: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        display: block !important;
+        opacity: 1 !important;
+        padding: 0 !important;
+    }
+    .modal-content {
+        border: none !important;
+        box-shadow: none !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        background: #ffffff !important;
+        color: #111827 !important;
+        padding: 2rem 2.5rem !important;
+        border-radius: 0 !important;
+        transform: none !important;
+    }
+    .no-print, .modal-footer { display: none !important; }
+
+    /* Re-color invoice tokens for white paper */
+    .invoice-doc { color: #111827 !important; }
+
+    .invoice-brand-name {
+        -webkit-text-fill-color: #1e1b4b !important;
+        background: none !important;
+        color: #1e1b4b !important;
+    }
+    .invoice-brand-sub { color: #6b7280 !important; }
+
+    .invoice-official-badge {
+        color: #3730a3 !important;
+        border-color: #a5b4fc !important;
+        background: #eef2ff !important;
+    }
+
+    .invoice-rule {
+        background: #c7d2fe !important;
+    }
+
+    .invoice-title { color: #111827 !important; }
+    .invoice-ref   { color: #6b7280 !important; }
+
+    .inv-field {
+        background: #f9fafb !important;
+        border-color: #e5e7eb !important;
+    }
+    .inv-label { color: #9ca3af !important; }
+    .inv-value { color: #111827 !important; }
+
+    .invoice-status-row {
+        background: #f0fdf4 !important;
+        border-color: #bbf7d0 !important;
+    }
+    .invoice-status-label { color: #374151 !important; }
+
+    .status-badge.status-finalizada {
+        background: #dcfce7 !important;
+        color: #166534 !important;
+        border-color: #bbf7d0 !important;
+        box-shadow: none !important;
+    }
+
+    .invoice-obs-block {
+        border-color: #6366f1 !important;
+        background: #eef2ff !important;
+    }
+    .invoice-obs-title { color: #4338ca !important; }
+    .invoice-obs-text  { color: #374151 !important; }
+
+    .invoice-footer { border-color: #e5e7eb !important; }
+    .invoice-timestamp { color: #374151 !important; }
+    .invoice-footer p:first-child { color: #6b7280 !important; }
+}
+

@@ -152,27 +152,55 @@
 
     <!-- MODAL FOR EXPORTING REPORT (RF-09) -->
     <div class="modal-overlay" id="report-modal">
-        <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-content" style="max-width: 660px;">
             <div id="print-area">
-                <h3 style="border-bottom: 2px solid var(--accent-blue); padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.4rem;">
-                    Comprobante de Tutoría Concluida
-                </h3>
-                <div style="font-size: 0.95rem; line-height: 1.6;" id="report-content">
+                <div id="report-content">
                     <!-- Loaded dynamically -->
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer no-print">
                 <button type="button" class="btn-secondary" onclick="closeModal('report-modal')">Cerrar</button>
                 <button type="button" class="btn-primary" style="width: auto;" onclick="window.print()">Imprimir / PDF</button>
             </div>
         </div>
     </div>
 
+    <!-- MODAL FOR EDITING DISPONIBILIDAD -->
+    <div class="modal-overlay" id="edit-disp-modal">
+        <div class="modal-content">
+            <h3 class="modal-header">Editar Bloque de Disponibilidad</h3>
+            <form id="form-edit-disp" onsubmit="handleEditDisponibilidad(event)">
+                <input type="hidden" id="edit-disp-id">
+                <div class="form-group">
+                    <label class="form-label" for="edit-disp-fecha">Fecha</label>
+                    <input type="date" id="edit-disp-fecha" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-disp-inicio">Hora de Inicio</label>
+                    <input type="time" id="edit-disp-inicio" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-disp-fin">Hora de Fin</label>
+                    <input type="time" id="edit-disp-fin" class="form-input" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeModal('edit-disp-modal')">Cancelar</button>
+                    <button type="submit" class="btn-primary" style="width: auto;">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
         // Set context and load dashboard
-        window.currentUserId = {{ user.id }};
-        window.currentUserRol = "{{ user.rol }}";
+        window.currentUserId   = {{ user.id }};
+        window.currentUserRol  = "{{ user.rol }}";
+        window.currentUserNombre = "{{ user.nombre }}";
+        
+        // Enforce future-only dates on the create form
+        const _today = new Date().toISOString().split('T')[0];
+        document.getElementById('disp-fecha').min = _today;
         
         initDashboard();
     </script>

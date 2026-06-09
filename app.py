@@ -1,5 +1,6 @@
 import os
 import sqlite3
+from datetime import date as dt_date
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -216,6 +217,11 @@ def create_disponibilidad():
     if not fecha or not hora_inicio or not hora_fin:
         return jsonify({'error': 'Fecha, hora de inicio y hora de fin son obligatorios'}), 400
 
+    # Validate date is not in the past
+    today = dt_date.today().isoformat()
+    if fecha < today:
+        return jsonify({'error': 'No se pueden registrar disponibilidades en fechas pasadas'}), 400
+
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -246,17 +252,29 @@ def get_docente_disponibilidades():
     cursor = conn.cursor()
     
     if session.get('rol') == 'Docente':
+        # Compute effective display state:
+        # - Libre past-date  -> Expirada  (slot expired without enrollment)
+        # - Ocupado + tutoria Finalizada -> Finalizada (synced with tutoria lifecycle)
+        # - Otherwise show the real stored estado
         cursor.execute('''
-            SELECT * FROM disponibilidades 
-            WHERE docente_id = ? 
-            ORDER BY fecha ASC, hora_inicio ASC
+            SELECT d.id, d.docente_id, d.fecha, d.hora_inicio, d.hora_fin, d.estado,
+                CASE
+                    WHEN d.fecha < date('now') AND d.estado = 'Libre' THEN 'Expirada'
+                    WHEN d.estado = 'Ocupado' AND t.estado = 'Finalizada' THEN 'Finalizada'
+                    ELSE d.estado
+                END as estado_efectivo
+            FROM disponibilidades d
+            LEFT JOIN tutorias t ON t.disponibilidad_id = d.id AND t.estado != 'Rechazada'
+            WHERE d.docente_id = ?
+            ORDER BY d.fecha ASC, d.hora_inicio ASC
         ''', (session['user_id'],))
     else:
+        # Students only see future Libre slots
         cursor.execute('''
             SELECT d.*, u.nombre AS docente_nombre, u.especialidad, u.cubiculo
             FROM disponibilidades d
             JOIN usuarios u ON d.docente_id = u.id
-            WHERE d.estado = 'Libre'
+            WHERE d.estado = 'Libre' AND d.fecha >= date('now')
             ORDER BY d.fecha ASC, d.hora_inicio ASC
         ''')
         
@@ -264,6 +282,76 @@ def get_docente_disponibilidades():
     conn.close()
     
     return jsonify([dict(row) for row in rows]), 200
+
+
+@app.route('/api/docente/disponibilidad/<int:disp_id>', methods=['DELETE'])
+def delete_disponibilidad(disp_id):
+    if 'user_id' not in session or session.get('rol') != 'Docente':
+        return jsonify({'error': 'Acceso denegado'}), 403
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM disponibilidades WHERE id = ?', (disp_id,))
+    slot = cursor.fetchone()
+    
+    if not slot:
+        conn.close()
+        return jsonify({'error': 'Disponibilidad no encontrada'}), 404
+    if slot['docente_id'] != session['user_id']:
+        conn.close()
+        return jsonify({'error': 'No autorizado'}), 403
+    if slot['estado'] == 'Ocupado':
+        conn.close()
+        return jsonify({'error': 'No se puede eliminar un horario con una tutoría asignada'}), 400
+    
+    cursor.execute('DELETE FROM disponibilidades WHERE id = ?', (disp_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'message': 'Disponibilidad eliminada exitosamente'}), 200
+
+
+@app.route('/api/docente/disponibilidad/<int:disp_id>', methods=['PUT'])
+def update_disponibilidad(disp_id):
+    if 'user_id' not in session or session.get('rol') != 'Docente':
+        return jsonify({'error': 'Acceso denegado'}), 403
+    
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'Datos no proporcionados'}), 400
+    
+    fecha = data.get('fecha', '').strip()
+    hora_inicio = data.get('hora_inicio', '').strip()
+    hora_fin = data.get('hora_fin', '').strip()
+    
+    if not fecha or not hora_inicio or not hora_fin:
+        return jsonify({'error': 'Todos los campos son obligatorios'}), 400
+    
+    today = dt_date.today().isoformat()
+    if fecha < today:
+        return jsonify({'error': 'No se pueden asignar fechas pasadas'}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM disponibilidades WHERE id = ?', (disp_id,))
+    slot = cursor.fetchone()
+    
+    if not slot:
+        conn.close()
+        return jsonify({'error': 'Disponibilidad no encontrada'}), 404
+    if slot['docente_id'] != session['user_id']:
+        conn.close()
+        return jsonify({'error': 'No autorizado'}), 403
+    if slot['estado'] == 'Ocupado':
+        conn.close()
+        return jsonify({'error': 'No se puede editar un horario con tutoría asignada'}), 400
+    
+    cursor.execute('''
+        UPDATE disponibilidades SET fecha = ?, hora_inicio = ?, hora_fin = ?
+        WHERE id = ?
+    ''', (fecha, hora_inicio, hora_fin, disp_id))
+    conn.commit()
+    conn.close()
+    return jsonify({'message': 'Disponibilidad actualizada exitosamente'}), 200
 
 # --- TUTORIAS ROUTES ---
 

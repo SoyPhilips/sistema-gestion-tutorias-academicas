@@ -495,12 +495,12 @@ function renderTutorias() {
             
             return `
                 <tr>
-                    <td><strong>${escapeHTML(t.estudiante_nombre)}</strong></td>
-                    <td>${escapeHTML(t.carrera)}<br><span style="font-size:0.75rem; color:var(--text-secondary);">${escapeHTML(t.matricula)}</span></td>
-                    <td>${escapeHTML(t.fecha_hora)}</td>
-                    <td>${escapeHTML(t.motivo)}</td>
-                    <td><span class="status-badge status-${t.estado.toLowerCase()}">${escapeHTML(t.estado)}</span></td>
-                    <td>${actionColumnHtml}</td>
+                    <td data-label="Estudiante"><strong>${escapeHTML(t.estudiante_nombre)}</strong></td>
+                    <td data-label="Carrera/Matrícula">${escapeHTML(t.carrera)}<br><span style="font-size:0.75rem; color:var(--text-secondary);">${escapeHTML(t.matricula)}</span></td>
+                    <td data-label="Fecha/Hora">${escapeHTML(t.fecha_hora)}</td>
+                    <td data-label="Motivo">${escapeHTML(t.motivo)}</td>
+                    <td data-label="Estado"><span class="status-badge status-${t.estado.toLowerCase()}">${escapeHTML(t.estado)}</span></td>
+                    <td data-label="Acciones">${actionColumnHtml}</td>
                 </tr>
             `;
         } else {
@@ -515,12 +515,12 @@ function renderTutorias() {
             
             return `
                 <tr>
-                    <td><strong>${escapeHTML(t.docente_nombre)}</strong></td>
-                    <td>${escapeHTML(t.especialidad)}<br><span style="font-size:0.75rem; color:var(--text-secondary);">${escapeHTML(t.cubiculo)}</span></td>
-                    <td>${escapeHTML(t.fecha_hora)}</td>
-                    <td>${escapeHTML(t.motivo)}</td>
-                    <td><span class="status-badge status-${t.estado.toLowerCase()}">${escapeHTML(t.estado)}</span></td>
-                    <td>${actionColumnHtml}</td>
+                    <td data-label="Docente"><strong>${escapeHTML(t.docente_nombre)}</strong></td>
+                    <td data-label="Especialidad/Cubículo">${escapeHTML(t.especialidad)}<br><span style="font-size:0.75rem; color:var(--text-secondary);">${escapeHTML(t.cubiculo)}</span></td>
+                    <td data-label="Fecha/Hora">${escapeHTML(t.fecha_hora)}</td>
+                    <td data-label="Motivo">${escapeHTML(t.motivo)}</td>
+                    <td data-label="Estado"><span class="status-badge status-${t.estado.toLowerCase()}">${escapeHTML(t.estado)}</span></td>
+                    <td data-label="Acciones">${actionColumnHtml}</td>
                 </tr>
             `;
         }
